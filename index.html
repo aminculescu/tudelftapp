@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Student Portal Demo</title>
+
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="./assets/icon-192.png" />
+
+  <meta name="theme-color" content="#04a9c8" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Student Portal" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+  <style>
+    :root {
+      --teal: #08a9c9;
+      --teal-dark: #0787a0;
+      --text: #202124;
+      --muted: #6f6f6f;
+      --line: #d8d8d8;
+      --light: #f4f4f4;
+      --drawer-width: 78vw;
+      --max-phone: 430px;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background: #111;
+      color: var(--text);
+      overscroll-behavior: none;
+    }
+
+    button {
+      font: inherit;
+    }
+
+    .phone {
+      min-height: 100vh;
+      max-width: var(--max-phone);
+      margin: 0 auto;
+      background: white;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .screen {
+      display: none;
+      min-height: 100vh;
+      background: white;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    .fake-status {
+      height: 64px;
+      padding: 13px 20px 0;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      color: white;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      background: var(--teal);
+    }
+
+    .dynamic-island {
+      width: 205px;
+      height: 38px;
+      background: #000;
+      border-radius: 999px;
+      margin-top: -4px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px 0 10px;
+      color: #bfa98d;
+      font-size: 18px;
+    }
+
+    .island-photo {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #d6d6d6, #7c7c7c);
+      border: 1px solid rgba(255,255,255,0.18);
+    }
+
+    .battery {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 18px;
+    }
+
+    .battery-pill {
+      background: #63d85f;
+      color: white;
+      border-radius: 6px;
+      padding: 1px 5px;
+      font-size: 15px;
+      line-height: 1.15;
+    }
+
+    body.is-standalone .fake-status {
+      display: none;
+    }
+
+    .home-hero {
+      background: var(--teal);
+      color: white;
+      min-height: 564px;
+      position: relative;
+      overflow: hidden;
+      padding-bottom: 26px;
+    }
+
+    body.is-standalone .home-hero {
+      padding-top: calc(56px + env(safe-area-inset-top));
+    }
+
+    .home-hero::before {
+      content: "";
+      position: absolute;
+      width: 530px;
+      height: 310px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.10);
+      transform: rotate(-20deg);
+      left: -145px;
+      top: 350px;
+    }
+
+    .home-hero::after {
+      content: "";
+      position: absolute;
+      width: 260px;
+      height: 260px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.08);
+      right: -130px;
+      top: 395px;
+    }
+
+    .top-row {
+      height: 82px;
+      display: grid;
+      grid-template-columns: 64px 1fr 108px;
+      align-items: center;
+      position: relative;
+      z-index: 2;
+      padding: 0 18px;
+    }
+
+    .icon-btn {
+      border: 0;
+      background: transparent;
+      color: inherit;
+      font-size: 31px;
+      line-height: 1;
+      padding: 0;
+      cursor: pointer;
+    }
+
+    .help-lang {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 26px;
+      font-weight: 700;
+      font-size: 22px;
+    }
+
+    .help-circle {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: white;
+      color: var(--teal);
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      font-size: 24px;
+    }
+
+    .brand {
+      text-align: center;
+      font-size: 34px;
+      font-weight: 800;
+      letter-spacing: -1px;
+      line-height: 1;
+      transform: translateX(15px);
+    }
+
+    .brand span {
+      font-weight: 300;
+      letter-spacing: -2px;
+    }
+
+    .brand-mark {
+      display: inline-block;
+      font-size: 23px;
+      transform: translate(8px, -22px) rotate(-18deg);
+      margin-left: -22px;
+      margin-right: -8px;
+    }
+
+    .quick-actions {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      justify-content: center;
+      gap: 22px;
+      margin: 0 0 38px;
+    }
+
+    .quick-action {
+      text-align: center;
+      color: white;
+      font-size: 18px;
+      font-weight: 400;
+    }
+
+    .quick-icon {
+      width: 76px;
+      height: 76px;
+      border-radius: 50%;
+      background: white;
+      color: var(--teal);
+      display: grid;
+      place-items: center;
+      font-size: 34px;
+      box-shadow: 0 4px 7px rgba(0,0,0,0.25);
+      margin: 0 auto 11px;
+    }
+
+    .hero-section {
+      position: relative;
+      z-index: 2;
+      padding: 0 18px;
+      margin-bottom: 34px;
+    }
+
+    .hero-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1.2px solid rgba(255,255,255,0.9);
+      padding-bottom: 15px;
+      margin-bottom: 16px;
+    }
+
+    .hero-title {
+      font-size: 38px;
+      font-weight: 300;
+      line-height: 1;
+      letter-spacing: -1px;
+    }
+
+    .chev {
+      font-size: 46px;
+      font-weight: 300;
+      line-height: 1;
+    }
+
+    .hero-note {
+      font-size: 18px;
+      font-weight: 400;
+    }
+
+    .messages-list {
+      background: white;
+      position: relative;
+      z-index: 3;
+    }
+
+    .message-item {
+      min-height: 102px;
+      border-bottom: 2px solid var(--teal);
+      display: grid;
+      grid-template-columns: 74px 1fr;
+      gap: 0;
+      align-items: center;
+      padding: 17px 14px 17px 15px;
+    }
+
+    .message-icon-wrap {
+      position: relative;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: #cfcfcf;
+      display: grid;
+      place-items: center;
+      color: white;
+      font-size: 29px;
+    }
+
+    .blue-dot {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--teal);
+      position: absolute;
+      top: 0;
+      left: -2px;
+    }
+
+    .message-topline {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 18px;
+      line-height: 1.2;
+      white-space: nowrap;
+    }
+
+    .message-date {
+      flex: 0 0 auto;
+    }
+
+    .message-title {
+      font-size: 18.5px;
+      font-weight: 800;
+      line-height: 1.22;
+      margin-top: 4px;
+    }
+
+    .drawer-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      background: rgba(0,0,0,0.35);
+      display: none;
+      max-width: var(--max-phone);
+      margin: 0 auto;
+    }
+
+    .drawer-overlay.open {
+      display: block;
+    }
+
+    .drawer-panel {
+      height: 100%;
+      width: var(--drawer-width);
+      max-width: 332px;
+      background: #fafafa;
+      box-shadow: 6px 0 18px rgba(0,0,0,0.18);
+      transform: translateX(-102%);
+      transition: transform 170ms ease;
+      overflow-y: auto;
+    }
+
+    .drawer-overlay.open .drawer-panel {
+      transform: translateX(0);
+    }
+
+    .drawer-profile {
+      background: var(--teal);
+      color: white;
+      min-height: 142px;
+      padding: 34px 24px 22px 20px;
+      display: grid;
+      grid-template-columns: 64px 1fr 24px;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+    }
+
+    .avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 50% 30%, #f2d7c0 0 18%, transparent 19%), linear-gradient(#5ab3b8 0 55%, #f5f5f5 56% 100%);
+      border: 1px solid rgba(255,255,255,0.35);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .avatar::after {
+      content: "";
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      background: #2f2f2f;
+      border-radius: 50% 50% 42% 42%;
+      left: 16px;
+      top: 11px;
+      opacity: 0.65;
+    }
+
+    .drawer-name {
+      font-size: 17px;
+      font-weight: 800;
+      line-height: 1.15;
+    }
+
+    .drawer-subtitle {
+      font-size: 17px;
+      font-weight: 300;
+      margin-top: 4px;
+    }
+
+    .drawer-profile .drawer-chevron {
+      font-size: 42px;
+      font-weight: 300;
+      transform: translateX(5px);
+    }
+
+    .drawer-list {
+      padding-top: 17px;
+    }
+
+    .drawer-item {
+      min-height: 48px;
+      display: grid;
+      grid-template-columns: 63px 1fr;
+      align-items: center;
+      padding: 5px 18px 5px 22px;
+      font-size: 21px;
+      font-weight: 800;
+      color: #222;
+    }
+
+    .drawer-item.active {
+      color: var(--teal);
+      background: #f0f0f0;
+    }
+
+    .drawer-ico {
+      color: #777;
+      font-size: 28px;
+      text-align: center;
+      width: 36px;
+    }
+
+    .drawer-item.active .drawer-ico {
+      color: var(--teal);
+    }
+
+    .drawer-spacer-line {
+      height: 1px;
+      background: #ddd;
+      margin: 36px 0 12px;
+    }
+
+    .details-drawer .drawer-panel {
+      background: #fafafa;
+    }
+
+    .details-header {
+      height: 62px;
+      background: #9e9e9e;
+      color: white;
+      display: grid;
+      grid-template-columns: 62px 1fr;
+      align-items: center;
+      padding-top: 0;
+      font-size: 26px;
+      font-weight: 800;
+    }
+
+    .details-header .back {
+      text-align: center;
+      font-size: 42px;
+      line-height: 1;
+      font-weight: 300;
+      cursor: pointer;
+    }
+
+    .details-list {
+      padding-top: 20px;
+    }
+
+    .details-item {
+      min-height: 57px;
+      display: grid;
+      grid-template-columns: 66px 1fr;
+      align-items: center;
+      padding: 4px 18px 4px 19px;
+      font-size: 21px;
+      font-weight: 800;
+      cursor: default;
+    }
+
+    .details-item.clickable {
+      cursor: pointer;
+    }
+
+    .details-ico {
+      font-size: 30px;
+      color: #777;
+      text-align: center;
+      width: 36px;
+    }
+
+    .screen-header {
+      height: 122px;
+      background: var(--teal);
+      color: white;
+      display: grid;
+      grid-template-columns: 62px 1fr 62px;
+      align-items: end;
+      padding: 0 18px 20px;
+      font-size: 26px;
+      font-weight: 800;
+      position: sticky;
+      top: 0;
+      z-index: 30;
+    }
+
+    body.is-standalone .screen-header {
+      height: calc(80px + env(safe-area-inset-top));
+      padding-top: env(safe-area-inset-top);
+    }
+
+    .screen-header .icon-btn {
+      font-size: 31px;
+      text-align: left;
+    }
+
+    .screen-title {
+      transform: translateX(-8px);
+      white-space: nowrap;
+    }
+
+    .screen-help {
+      justify-self: end;
+      margin-bottom: 1px;
+    }
+
+    .personal-content {
+      background: white;
+      min-height: calc(100vh - 122px);
+      padding: 37px 17px 70px;
+    }
+
+    .photo-card {
+      height: 248px;
+      margin: 0 0 42px;
+      background: white;
+      box-shadow: 0 1px 18px rgba(0,0,0,0.12);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+    }
+
+    .big-avatar {
+      width: 153px;
+      height: 153px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 50% 30%, #f1d5be 0 17%, transparent 18%), linear-gradient(#5eb5b9 0 55%, #f7f7f7 56% 100%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .big-avatar::after {
+      content: "";
+      position: absolute;
+      width: 51px;
+      height: 46px;
+      background: #333;
+      border-radius: 50% 50% 42% 42%;
+      left: 51px;
+      top: 33px;
+      opacity: 0.62;
+    }
+
+    .edit-text {
+      font-size: 18px;
+      letter-spacing: 1.6px;
+      font-weight: 800;
+    }
+
+    .edit-text span {
+      display: inline-block;
+      width: 0;
+      height: 0;
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-top: 7px solid #222;
+      margin-left: 7px;
+      transform: translateY(-2px);
+    }
+
+    .rule {
+      height: 1px;
+      background: #ddd;
+      margin: 0 0 55px;
+    }
+
+    .field-block {
+      padding: 0 0 26px;
+    }
+
+    .field-label {
+      color: #777;
+      font-size: 19px;
+      margin-bottom: 8px;
+      line-height: 1.2;
+    }
+
+    .field-value {
+      color: #111;
+      font-size: 20px;
+      line-height: 1.25;
+      min-height: 25px;
+    }
+
+    .placeholder {
+      color: #111;
+      letter-spacing: 0.2px;
+    }
+
+    .section-rule {
+      height: 1px;
+      background: #ddd;
+      margin: 18px 0 48px;
+    }
+
+    .center-note {
+      margin: 32px auto 0;
+      max-width: 330px;
+      font-size: 17px;
+      line-height: 1.4;
+      text-align: center;
+      border-top: 1px solid #ddd;
+      padding-top: 24px;
+    }
+
+    .highlight {
+      background: #1d9ed3;
+      color: white;
+      padding: 0 2px;
+    }
+
+    @media (min-width: 431px) {
+      body {
+        background: #111;
+      }
+
+      .phone {
+        min-height: 100vh;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="phone">
+    <section id="homeScreen" class="screen active">
+      <div class="fake-status">
+        <div>16:55</div>
+        <div class="dynamic-island"><div class="island-photo"></div><div>⋯⋯</div></div>
+        <div class="battery"><span>⌁</span><span class="battery-pill">83</span></div>
+      </div>
+
+      <div class="home-hero">
+        <div class="top-row">
+          <button class="icon-btn" onclick="openMainMenu()" aria-label="Open menu">☰</button>
+
+          <div class="brand"><span class="brand-mark">◆</span>TU<span>Delft</span></div>
+
+          <div class="help-lang">
+            <div class="help-circle">?</div>
+            <div>NL</div>
+          </div>
+        </div>
+
+        <div class="quick-actions">
+          <div class="quick-action">
+            <div class="quick-icon">▤</div>
+            <div>Grades</div>
+          </div>
+          <div class="quick-action">
+            <div class="quick-icon">↗</div>
+            <div>Progress</div>
+          </div>
+          <div class="quick-action">
+            <div class="quick-icon">✎</div>
+            <div>Enrol</div>
+          </div>
+        </div>
+
+        <div class="hero-section">
+          <div class="hero-title-row">
+            <div class="hero-title">Calendar</div>
+            <div class="chev">›</div>
+          </div>
+          <div class="hero-note">No activities</div>
+        </div>
+
+        <div class="hero-section">
+          <div class="hero-title-row">
+            <div class="hero-title">Cases</div>
+            <div class="chev">›</div>
+          </div>
+          <div class="hero-note">No cases with open tasks</div>
+        </div>
+
+        <div class="hero-section" style="margin-bottom: 0;">
+          <div class="hero-title-row" style="border-bottom: 0; padding-bottom: 0; margin-bottom: 0;">
+            <div class="hero-title">Messages</div>
+            <div class="chev">›</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="messages-list">
+        <article class="message-item">
+          <div class="message-icon-wrap"><div class="blue-dot"></div>✉</div>
+          <div>
+            <div class="message-topline"><span>Education &amp; Student Affairs TU Delft</span><span class="message-date">08-04-2026</span></div>
+            <div class="message-title">Completion E+ Scholarship</div>
+          </div>
+        </article>
+
+        <article class="message-item">
+          <div class="message-icon-wrap"><div class="blue-dot"></div>✉</div>
+          <div>
+            <div class="message-topline"><span>Education &amp; Student Affairs TU Delft</span><span class="message-date">08-04-2026</span></div>
+            <div class="message-title">Confirmation of your application for a grant</div>
+          </div>
+        </article>
+
+        <article class="message-item">
+          <div class="message-icon-wrap"><div class="blue-dot"></div>✉</div>
+          <div>
+            <div class="message-topline"><span>Education &amp; Student Affairs TU Delft</span><span class="message-date">08-04-2026</span></div>
+            <div class="message-title">Confirmation: Your documents have been received</div>
+          </div>
+        </article>
+
+        <article class="message-item">
+          <div class="message-icon-wrap"><div class="blue-dot"></div>✉</div>
+          <div>
+            <div class="message-topline"><span>Education &amp; Student Affairs TU Delft</span><span class="message-date">01-04-2026</span></div>
+            <div class="message-title">Urgent: Submit your Erasmus 'After Mobility' documents</div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="personalScreen" class="screen">
+      <div class="fake-status">
+        <div>16:55</div>
+        <div class="dynamic-island"><div class="island-photo"></div><div>||||</div></div>
+        <div class="battery"><span>⌁</span><span class="battery-pill">83</span></div>
+      </div>
+
+      <header class="screen-header">
+        <button class="icon-btn" onclick="openMainMenu()" aria-label="Open menu">☰</button>
+        <div class="screen-title">Personal details</div>
+        <div class="help-circle screen-help">?</div>
+      </header>
+
+      <main class="personal-content">
+        <div class="photo-card">
+          <div class="big-avatar"></div>
+          <div class="edit-text">EDIT <span></span></div>
+        </div>
+
+        <div class="rule"></div>
+
+        <div class="field-block">
+          <div class="field-label">Name</div>
+          <div class="field-value placeholder">[Full name]</div>
+        </div>
+
+        <div class="field-block">
+          <div class="field-label">Student ID</div>
+          <div class="field-value placeholder">[Student ID]</div>
+        </div>
+
+        <div class="field-block">
+          <div class="field-label">First names</div>
+          <div class="field-value placeholder">[First names]</div>
+        </div>
+
+        <div class="field-block">
+          <div class="field-label">Name (as known by)</div>
+          <div class="field-value placeholder">[Known name]</div>
+        </div>
+
+        <div class="section-rule"></div>
+
+        <div class="field-block">
+          <div class="field-label">Date of birth</div>
+          <div class="field-value placeholder">[DD-MM-YYYY]</div>
+        </div>
+
+        <div class="field-block">
+          <div class="field-label">Place of birth</div>
+          <div class="field-value placeholder">[Place of birth]</div>
+        </div>
+
+        <div class="section-rule"></div>
+
+        <div class="field-block">
+          <div class="field-label">Degree programme</div>
+          <div class="field-value placeholder">[Degree programme]</div>
+        </div>
+
+        <div class="center-note">
+          Starting from February 2024 this is the place to <span class="highlight">change your profile photo</span>
+        </div>
+      </main>
+    </section>
+
+    <div id="mainMenu" class="drawer-overlay" onclick="closeAllMenus()">
+      <aside class="drawer-panel" onclick="event.stopPropagation()">
+        <div class="drawer-profile" onclick="openDetailsMenu()">
+          <div class="avatar"></div>
+          <div>
+            <div class="drawer-name">[Full Name]</div>
+            <div class="drawer-subtitle">My details</div>
+          </div>
+          <div class="drawer-chevron">›</div>
+        </div>
+
+        <div class="drawer-list">
+          <div class="drawer-item active"><span class="drawer-ico">⌂</span><span>Home</span></div>
+          <div class="drawer-item"><span class="drawer-ico">▣</span><span>Calendar</span></div>
+          <div class="drawer-item"><span class="drawer-ico">▰</span><span>Student card</span></div>
+          <div class="drawer-item"><span class="drawer-ico">▤</span><span>Grades</span></div>
+          <div class="drawer-item"><span class="drawer-ico">↗</span><span>Progress</span></div>
+          <div class="drawer-item"><span class="drawer-ico">▣</span><span>Cases</span></div>
+          <div class="drawer-item"><span class="drawer-ico">✉</span><span>Messages</span></div>
+          <div class="drawer-item"><span class="drawer-ico">◔</span><span>News</span></div>
+          <div class="drawer-item"><span class="drawer-ico">✎</span><span>Enrol</span></div>
+          <div class="drawer-item"><span class="drawer-ico">☗</span><span>Course catalogue</span></div>
+          <div class="drawer-item"><span class="drawer-ico">◎</span><span>Stay abroad requests</span></div>
+          <div class="drawer-item"><span class="drawer-ico">▣</span><span>Notes</span></div>
+        </div>
+
+        <div class="drawer-spacer-line"></div>
+        <div class="drawer-item"><span class="drawer-ico">⇥</span><span>Log off</span></div>
+      </aside>
+    </div>
+
+    <div id="detailsMenu" class="drawer-overlay details-drawer" onclick="closeAllMenus()">
+      <aside class="drawer-panel" onclick="event.stopPropagation()">
+        <div class="details-header">
+          <div class="back" onclick="openMainMenu()">‹</div>
+          <div>My details</div>
+        </div>
+
+        <div class="details-list">
+          <div class="details-item clickable" onclick="showPersonalDetails()"><span class="details-ico">●</span><span>Personal details</span></div>
+          <div class="details-item"><span class="details-ico">▣</span><span>Contact details</span></div>
+          <div class="details-item"><span class="details-ico">◒</span><span>Enrolment study programme</span></div>
+          <div class="details-item"><span class="details-ico">†</span><span>Facilities</span></div>
+        </div>
+
+        <div class="drawer-spacer-line" style="margin-top: 22px;"></div>
+        <div class="drawer-item"><span class="drawer-ico">⇥</span><span>Log off</span></div>
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    const mainMenu = document.getElementById("mainMenu");
+    const detailsMenu = document.getElementById("detailsMenu");
+    const homeScreen = document.getElementById("homeScreen");
+    const personalScreen = document.getElementById("personalScreen");
+
+    function isStandaloneMode() {
+      return window.navigator.standalone === true || window.matchMedia("(display-mode: standalone)").matches;
+    }
+
+    if (isStandaloneMode()) {
+      document.body.classList.add("is-standalone");
+    }
+
+    function openMainMenu() {
+      detailsMenu.classList.remove("open");
+      mainMenu.classList.add("open");
+    }
+
+    function openDetailsMenu() {
+      mainMenu.classList.remove("open");
+      detailsMenu.classList.add("open");
+    }
+
+    function closeAllMenus() {
+      mainMenu.classList.remove("open");
+      detailsMenu.classList.remove("open");
+    }
+
+    function showPersonalDetails() {
+      closeAllMenus();
+      homeScreen.classList.remove("active");
+      personalScreen.classList.add("active");
+      window.scrollTo(0, 0);
+    }
+
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("./service-worker.js");
+    }
+  </script>
+</body>
+</html>
