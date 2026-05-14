@@ -1,9 +1,10 @@
-const CACHE_NAME = "student-portal-demo-v1";
+const CACHE_NAME = "student-portal-demo-v2";
 
 const FILES_TO_CACHE = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
+  "./assets/icon-180.png",
   "./assets/icon-192.png",
   "./assets/icon-512.png"
 ];
